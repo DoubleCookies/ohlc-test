@@ -10,6 +10,10 @@ public class Ohlc {
     private OhlcPeriod ohlcPeriod;
     private long periodStartUtcTimestamp;
 
+    public Ohlc(OhlcPeriod ohlcPeriod) {
+        this.ohlcPeriod = ohlcPeriod;
+    }
+
     public double getOpenPrice() {
         return openPrice;
     }
