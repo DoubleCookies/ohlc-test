@@ -3,10 +3,13 @@ package com.testtask.ohlc;
 import com.testtask.ohlc.enums.OhlcPeriod;
 import com.testtask.ohlc.model.Ohlc;
 import com.testtask.ohlc.model.OhlcStorage;
+import com.testtask.ohlc.model.TestQuoteObject;
 import com.testtask.ohlc.services.OhlcProcessingService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+
+import java.time.Instant;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -48,6 +51,18 @@ class OhlcApplicationTests {
 	@Test
 	public void isStorageMapInOhlcServiceCreated() {
 		assertNotNull(ohlcProcessingService.getInstrumentsDataStorage());
+	}
+
+	@Test
+	public void shouldAddNewQuoteToMap() {
+		TestQuoteObject quote = new TestQuoteObject();
+		long instrumentId = 1L;
+		quote.setInstrumentId(instrumentId);
+		quote.setPrice(42);
+		quote.setUtcTimestamp(Instant.now().getEpochSecond());
+		ohlcProcessingService.onQuote(quote);
+
+		assertTrue(ohlcProcessingService.getInstrumentsDataStorage().containsKey(instrumentId));
 	}
 
 }

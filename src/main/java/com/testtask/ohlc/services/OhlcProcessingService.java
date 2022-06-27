@@ -36,6 +36,15 @@ public class OhlcProcessingService implements OhlcService {
 
     @Override
     public void onQuote(Quote quote) {
+        long instrumentId = quote.getInstrumentId();
 
+        if (!instrumentsDataStorage.containsKey(instrumentId)) {
+            OhlcStorage storage = initOhlcStorageForInstrument();
+            instrumentsDataStorage.put(instrumentId, storage);
+        }
+    }
+
+    private OhlcStorage initOhlcStorageForInstrument() {
+        return new OhlcStorage();
     }
 }
