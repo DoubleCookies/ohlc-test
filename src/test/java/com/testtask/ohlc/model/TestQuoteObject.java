@@ -8,6 +8,14 @@ public class TestQuoteObject implements Quote {
     private long instrumentId;
     private long utcTimestamp;
 
+    public TestQuoteObject() {}
+
+    public TestQuoteObject(double price, long instrumentId, long utcTimestamp) {
+        this.price = price;
+        this.instrumentId = instrumentId;
+        this.utcTimestamp = utcTimestamp;
+    }
+
     @Override
     public double getPrice() {
         return price;
