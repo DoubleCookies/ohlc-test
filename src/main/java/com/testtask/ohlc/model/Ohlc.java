@@ -62,5 +62,13 @@ public class Ohlc {
         this.periodStartUtcTimestamp = periodStartUtcTimestamp;
     }
 
+    /**
+     * Method checks if Ohlc was "active" - because openPrice will be always updated if Ohlc was used
+     * @return true, if price != 0
+     */
+    public boolean isOhlcWithPrice() {
+        return openPrice != 0;
+    }
+
 
 }

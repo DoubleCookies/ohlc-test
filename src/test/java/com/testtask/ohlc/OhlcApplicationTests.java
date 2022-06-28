@@ -183,7 +183,35 @@ class OhlcApplicationTests {
 			assertEquals(storage.getMinuteOhlc().getOpenPrice(), ohlc.getOpenPrice());
 			assertEquals(storage.getMinuteOhlc().getClosePrice(), ohlc.getClosePrice());
 		}
+	}
 
+	@Test
+	public void shouldInitHourOhlcWithMinuteOhlc() {
+		int count = 10;
+		long instrumentId = 1L;
+		List<Quote> testQuoteList = quotesGenerator.createSingleInstrumentQuotes(count, instrumentId);
+
+		double openPrice = testQuoteList.get(0).getPrice();
+		double closePrice = testQuoteList.get(count-1).getPrice();
+
+		double minPrice = openPrice;
+		double maxPrice = openPrice;
+
+		for (Quote quote : testQuoteList) {
+			double currentPrice = quote.getPrice();
+			ohlcProcessingService.onQuote(quote);
+			if (currentPrice < minPrice) {
+				minPrice = currentPrice;
+			}
+			if (currentPrice > maxPrice)
+				maxPrice = currentPrice;
+		}
+		ohlcProcessingService.updateHourOhlcAfterSavingMinuteOhlc();
+		OhlcStorage storage = ohlcProcessingService.getInstrumentsDataStorage().get(instrumentId);
+		assertEquals(storage.getHourOhlc().getOpenPrice(), openPrice);
+		assertEquals(storage.getHourOhlc().getClosePrice(), closePrice);
+		assertEquals(storage.getHourOhlc().getLowPrice(), minPrice);
+		assertEquals(storage.getHourOhlc().getHighPrice(), maxPrice);
 	}
 
 }
