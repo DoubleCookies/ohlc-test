@@ -1,17 +1,18 @@
 package com.testtask.ohlc;
 
 import com.testtask.ohlc.enums.OhlcPeriod;
+import com.testtask.ohlc.interfaces.Quote;
 import com.testtask.ohlc.model.Ohlc;
 import com.testtask.ohlc.model.OhlcStorage;
 import com.testtask.ohlc.model.TestQuoteObject;
 import com.testtask.ohlc.services.OhlcProcessingService;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.Instant;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -20,6 +21,9 @@ class OhlcApplicationTests {
 
 	@Autowired
 	private OhlcProcessingService ohlcProcessingService;
+
+	@Autowired
+	private QuotesGenerator quotesGenerator;
 
 	@BeforeEach
 	public void clearStorage() {
@@ -66,7 +70,7 @@ class OhlcApplicationTests {
 		long instrumentId = 1L;
 		quote.setInstrumentId(instrumentId);
 		quote.setPrice(42);
-		quote.setUtcTimestamp(Instant.now().getEpochSecond());
+		quote.setUtcTimestamp(System.currentTimeMillis());
 		ohlcProcessingService.onQuote(quote);
 
 		assertTrue(ohlcProcessingService.getInstrumentsDataStorage().containsKey(instrumentId));
@@ -80,7 +84,7 @@ class OhlcApplicationTests {
 
 		quote.setInstrumentId(instrumentId);
 		quote.setPrice(price);
-		quote.setUtcTimestamp(Instant.now().getEpochSecond());
+		quote.setUtcTimestamp(System.currentTimeMillis());
 		ohlcProcessingService.onQuote(quote);
 
 		OhlcStorage storage = ohlcProcessingService.getInstrumentsDataStorage().get(instrumentId);
@@ -106,6 +110,35 @@ class OhlcApplicationTests {
 		assertEquals(storage.getMinuteOhlc().getClosePrice(), price2);
 		assertEquals(storage.getMinuteOhlc().getLowPrice(), price1);
 		assertEquals(storage.getMinuteOhlc().getHighPrice(), price2);
+	}
+
+	@Test
+	public void shouldStoreInfoAboutMultipleQuotes() {
+		int count = 100;
+		long instrumentId = 1L;
+		List<Quote> testQuoteList = quotesGenerator.createSingleInstrumentQuotes(count, instrumentId);
+
+		double openPrice = testQuoteList.get(0).getPrice();
+		double closePrice = testQuoteList.get(count-1).getPrice();
+
+		double minPrice = openPrice;
+		double maxPrice = openPrice;
+
+		for (Quote quote : testQuoteList) {
+			double currentPrice = quote.getPrice();
+			ohlcProcessingService.onQuote(quote);
+			if (currentPrice < minPrice) {
+				minPrice = currentPrice;
+			}
+			if (currentPrice > maxPrice)
+				maxPrice = currentPrice;
+		}
+
+		OhlcStorage storage = ohlcProcessingService.getInstrumentsDataStorage().get(instrumentId);
+		assertEquals(storage.getMinuteOhlc().getOpenPrice(), openPrice);
+		assertEquals(storage.getMinuteOhlc().getClosePrice(), closePrice);
+		assertEquals(storage.getMinuteOhlc().getLowPrice(), minPrice);
+		assertEquals(storage.getMinuteOhlc().getHighPrice(), maxPrice);
 	}
 
 }
