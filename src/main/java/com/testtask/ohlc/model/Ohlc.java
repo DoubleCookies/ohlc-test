@@ -61,4 +61,6 @@ public class Ohlc {
     public void setPeriodStartUtcTimestamp(long periodStartUtcTimestamp) {
         this.periodStartUtcTimestamp = periodStartUtcTimestamp;
     }
+
+
 }

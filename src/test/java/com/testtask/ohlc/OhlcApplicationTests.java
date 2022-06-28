@@ -13,6 +13,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -47,7 +48,7 @@ class OhlcApplicationTests {
 	}
 
 	@Test
-	public void isOhlcStorageContainsCorrectOhlcs() {
+	public void isOhlcStorageContainsCorrectOhlcObjects() {
 		OhlcStorage ohlcStorage = new OhlcStorage();
 		assertSame(ohlcStorage.getMinuteOhlc().getOhlcPeriod(), OhlcPeriod.M1);
 		assertSame(ohlcStorage.getHourOhlc().getOhlcPeriod(), OhlcPeriod.H1);
@@ -139,6 +140,50 @@ class OhlcApplicationTests {
 		assertEquals(storage.getMinuteOhlc().getClosePrice(), closePrice);
 		assertEquals(storage.getMinuteOhlc().getLowPrice(), minPrice);
 		assertEquals(storage.getMinuteOhlc().getHighPrice(), maxPrice);
+	}
+
+	@Test
+	public void shouldStoreOhlcInfoForMultipleInstruments() {
+		int count = 500;
+		long[] instrumentIds = {1,2,3,4};
+		List<Quote> testQuoteList = quotesGenerator.createMultipleInstrumentQuotes(count, instrumentIds);
+
+		for (Quote quote : testQuoteList) {
+			ohlcProcessingService.onQuote(quote);
+		}
+
+		for (long instrumentId : instrumentIds) {
+			List<Quote> filteredQuotes = testQuoteList.stream()
+					.filter(x -> x.getInstrumentId() == instrumentId).collect(Collectors.toList());
+			Ohlc ohlc = new Ohlc(OhlcPeriod.M1);
+			if (filteredQuotes.size() > 0) {
+				Quote initQuote = filteredQuotes.get(0);
+				ohlc.setHighPrice(initQuote.getPrice());
+				ohlc.setLowPrice(initQuote.getPrice());
+				ohlc.setOpenPrice(initQuote.getPrice());
+				ohlc.setClosePrice(initQuote.getPrice());
+			} else {
+				if (!ohlcProcessingService.getInstrumentsDataStorage().containsKey(instrumentId))
+					continue;
+				else
+					assert false;
+			}
+			for (Quote quote : filteredQuotes) {
+				double price = quote.getPrice();
+				ohlc.setClosePrice(price);
+				if (price < ohlc.getLowPrice())
+					ohlc.setLowPrice(price);
+				if (price > ohlc.getHighPrice())
+					ohlc.setHighPrice(price);
+			}
+
+			OhlcStorage storage = ohlcProcessingService.getInstrumentsDataStorage().get(instrumentId);
+			assertEquals(storage.getMinuteOhlc().getLowPrice(), ohlc.getLowPrice());
+			assertEquals(storage.getMinuteOhlc().getHighPrice(), ohlc.getHighPrice());
+			assertEquals(storage.getMinuteOhlc().getOpenPrice(), ohlc.getOpenPrice());
+			assertEquals(storage.getMinuteOhlc().getClosePrice(), ohlc.getClosePrice());
+		}
+
 	}
 
 }

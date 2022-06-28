@@ -22,4 +22,14 @@ public class QuotesGenerator {
         }
         return quoteList;
     }
+
+    public List<Quote> createMultipleInstrumentQuotes(int count, long... instrumentId) {
+        List<Quote> quoteList = new ArrayList<>();
+        for (int i = 0; i < count; i++) {
+            double price = random.nextDouble() * 100.0;
+            TestQuoteObject quoteObject = new TestQuoteObject(price, random.nextInt(instrumentId.length), System.currentTimeMillis());
+            quoteList.add(quoteObject);
+        }
+        return quoteList;
+    }
 }
