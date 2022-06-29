@@ -207,7 +207,7 @@ class OhlcApplicationTests {
 			if (currentPrice > maxPrice)
 				maxPrice = currentPrice;
 		}
-		ohlcProcessingService.updateHourOhlcAfterSavingMinuteOhlc();
+		ohlcProcessingService.updateHourOhlcBeforeSavingMinuteOhlc();
 		OhlcStorage storage = ohlcProcessingService.getInstrumentsDataStorage().get(instrumentId);
 		assertEquals(storage.getHourOhlc().getOpenPrice(), openPrice);
 		assertEquals(storage.getHourOhlc().getClosePrice(), closePrice);
@@ -235,7 +235,7 @@ class OhlcApplicationTests {
 			if (currentPrice > maxPrice)
 				maxPrice = currentPrice;
 		}
-		ohlcProcessingService.updateHourOhlcAfterSavingMinuteOhlc();
+		ohlcProcessingService.updateHourOhlcBeforeSavingMinuteOhlc();
 
 		// Second batch
 		testQuoteList = quotesGenerator.createSingleInstrumentQuotes(count, instrumentId);
@@ -249,7 +249,7 @@ class OhlcApplicationTests {
 			if (currentPrice > maxPrice)
 				maxPrice = currentPrice;
 		}
-		ohlcProcessingService.updateHourOhlcAfterSavingMinuteOhlc();
+		ohlcProcessingService.updateHourOhlcBeforeSavingMinuteOhlc();
 
 		OhlcStorage storage = ohlcProcessingService.getInstrumentsDataStorage().get(instrumentId);
 		assertEquals(storage.getHourOhlc().getOpenPrice(), openPrice);
@@ -279,8 +279,8 @@ class OhlcApplicationTests {
 			if (currentPrice > maxPrice)
 				maxPrice = currentPrice;
 		}
-		ohlcProcessingService.updateHourOhlcAfterSavingMinuteOhlc();
-		ohlcProcessingService.updateDailyOhlcAfterSavingHourOhlc();
+		ohlcProcessingService.updateHourOhlcBeforeSavingMinuteOhlc();
+		ohlcProcessingService.updateDailyOhlcBeforeSavingHourOhlc();
 
 		OhlcStorage storage = ohlcProcessingService.getInstrumentsDataStorage().get(instrumentId);
 		assertEquals(storage.getDailyOhlc().getOpenPrice(), openPrice);
@@ -309,8 +309,8 @@ class OhlcApplicationTests {
 			if (currentPrice > maxPrice)
 				maxPrice = currentPrice;
 		}
-		ohlcProcessingService.updateHourOhlcAfterSavingMinuteOhlc();
-		ohlcProcessingService.updateDailyOhlcAfterSavingHourOhlc();
+		ohlcProcessingService.updateHourOhlcBeforeSavingMinuteOhlc();
+		ohlcProcessingService.updateDailyOhlcBeforeSavingHourOhlc();
 
 		// Second batch
 		testQuoteList = quotesGenerator.createSingleInstrumentQuotes(count, instrumentId);
@@ -324,8 +324,8 @@ class OhlcApplicationTests {
 			if (currentPrice > maxPrice)
 				maxPrice = currentPrice;
 		}
-		ohlcProcessingService.updateHourOhlcAfterSavingMinuteOhlc();
-		ohlcProcessingService.updateDailyOhlcAfterSavingHourOhlc();
+		ohlcProcessingService.updateHourOhlcBeforeSavingMinuteOhlc();
+		ohlcProcessingService.updateDailyOhlcBeforeSavingHourOhlc();
 
 		OhlcStorage storage = ohlcProcessingService.getInstrumentsDataStorage().get(instrumentId);
 		assertEquals(storage.getDailyOhlc().getOpenPrice(), openPrice);
@@ -371,6 +371,30 @@ class OhlcApplicationTests {
 		quote.setUtcTimestamp(System.currentTimeMillis());
 		ohlcProcessingService.onQuote(quote);
 		ohlcProcessingService.storeAllDailyOhlc();
+	}
+
+	@Test
+	public void shouldClearOhlcAfterScheduledProcessing() {
+		TestQuoteObject quote = new TestQuoteObject();
+		long instrumentId = 1L;
+		double price = 42;
+
+		quote.setInstrumentId(instrumentId);
+		quote.setPrice(price);
+		quote.setUtcTimestamp(System.currentTimeMillis());
+		ohlcProcessingService.onQuote(quote);
+
+		ohlcProcessingService.processMinuteOhlcAfterPeriod();
+		ohlcProcessingService.processHourOhlcAfterPeriod();
+		ohlcProcessingService.processDailyOhlcAfterPeriod();
+
+		OhlcStorage storage = ohlcProcessingService.getInstrumentsDataStorage().get(instrumentId);
+		Ohlc minuteOhlc = storage.getMinuteOhlc();
+		Ohlc hourOhlc = storage.getHourOhlc();
+		Ohlc dailyOhlc = storage.getHourOhlc();
+		assertFalse(minuteOhlc.isOhlcWithPrice());
+		assertFalse(hourOhlc.isOhlcWithPrice());
+		assertFalse(dailyOhlc.isOhlcWithPrice());
 	}
 
 }

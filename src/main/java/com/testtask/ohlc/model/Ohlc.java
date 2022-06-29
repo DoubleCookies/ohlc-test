@@ -70,5 +70,12 @@ public class Ohlc {
         return openPrice != 0;
     }
 
+    public void clearOhlc() {
+        closePrice = 0;
+        openPrice = 0;
+        lowPrice = 0;
+        highPrice = 0;
+    }
+
 
 }

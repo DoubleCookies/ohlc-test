@@ -92,10 +92,28 @@ public class OhlcProcessingService implements OhlcService {
         }
     }
 
+        public void processMinuteOhlcAfterPeriod() {
+        updateHourOhlcBeforeSavingMinuteOhlc();
+        updateDailyOhlcBeforeSavingHourOhlc();
+        storeAllMinuteOhlc();
+        clearMinuteOhlc();
+    }
+
+    public void processHourOhlcAfterPeriod() {
+        updateDailyOhlcBeforeSavingHourOhlc();
+        storeAllHourOhlc();
+        clearHourOhlc();
+    }
+
+    public void processDailyOhlcAfterPeriod() {
+        storeAllDailyOhlc();
+        clearDailyOhlc();
+    }
+
     /**
      * Update data of hour Ohlc with info from minute Ohlc
      */
-    public void updateHourOhlcAfterSavingMinuteOhlc() {
+    public void updateHourOhlcBeforeSavingMinuteOhlc() {
         for (Map.Entry<Long, OhlcStorage> entry : instrumentsDataStorage.entrySet()) {
             Ohlc minuteOhlc = entry.getValue().getMinuteOhlc();
             Ohlc hourOhlc = entry.getValue().getHourOhlc();
@@ -110,9 +128,9 @@ public class OhlcProcessingService implements OhlcService {
     }
 
     /**
-     * Update data of dauly Ohlc with info from hour Ohlc
+     * Update data of daily Ohlc with info from hour Ohlc
      */
-    public void updateDailyOhlcAfterSavingHourOhlc() {
+    public void updateDailyOhlcBeforeSavingHourOhlc() {
         for (Map.Entry<Long, OhlcStorage> entry : instrumentsDataStorage.entrySet()) {
             Ohlc hourOhlc = entry.getValue().getHourOhlc();
             Ohlc dailyOhlc = entry.getValue().getDailyOhlc();
@@ -182,5 +200,26 @@ public class OhlcProcessingService implements OhlcService {
 
     private void storeOhlc(Ohlc ohlc) {
         ohlcStoreService.storeOhlc(ohlc);
+    }
+
+    private void clearMinuteOhlc() {
+        for (Map.Entry<Long, OhlcStorage> entry : instrumentsDataStorage.entrySet()) {
+            Ohlc ohlc = entry.getValue().getMinuteOhlc();
+            ohlc.clearOhlc();
+        }
+    }
+
+    private void clearHourOhlc() {
+        for (Map.Entry<Long, OhlcStorage> entry : instrumentsDataStorage.entrySet()) {
+            Ohlc ohlc = entry.getValue().getHourOhlc();
+            ohlc.clearOhlc();
+        }
+    }
+
+    private void clearDailyOhlc() {
+        for (Map.Entry<Long, OhlcStorage> entry : instrumentsDataStorage.entrySet()) {
+            Ohlc ohlc = entry.getValue().getDailyOhlc();
+            ohlc.clearOhlc();
+        }
     }
 }
