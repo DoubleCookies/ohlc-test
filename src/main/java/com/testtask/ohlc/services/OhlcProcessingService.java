@@ -5,6 +5,7 @@ import com.testtask.ohlc.interfaces.OhlcService;
 import com.testtask.ohlc.interfaces.Quote;
 import com.testtask.ohlc.model.Ohlc;
 import com.testtask.ohlc.model.OhlcStorage;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -13,6 +14,14 @@ import java.util.Map;
 
 @Service
 public class OhlcProcessingService implements OhlcService {
+
+    private final OhlcStoreService ohlcStoreService;
+
+    @Autowired
+    public OhlcProcessingService(OhlcStoreService ohlcStoreService) {
+        this.ohlcStoreService = ohlcStoreService;
+    }
+
     private final Map<Long, OhlcStorage> instrumentsDataStorage = new HashMap<>();
 
     public Map<Long, OhlcStorage> getInstrumentsDataStorage() {
@@ -142,5 +151,36 @@ public class OhlcProcessingService implements OhlcService {
             longOhlc.setLowPrice(shortOhlc.getLowPrice());
         if (shortOhlc.getHighPrice() > longOhlc.getHighPrice())
             longOhlc.setHighPrice(shortOhlc.getHighPrice());
+    }
+
+    public void storeAllMinuteOhlc() {
+        for (Map.Entry<Long, OhlcStorage> entry : instrumentsDataStorage.entrySet()) {
+            Ohlc ohlc = entry.getValue().getMinuteOhlc();
+            if (ohlc.isOhlcWithPrice()) {
+                storeOhlc(ohlc);
+            }
+        }
+    }
+
+    public void storeAllHourOhlc() {
+        for (Map.Entry<Long, OhlcStorage> entry : instrumentsDataStorage.entrySet()) {
+            Ohlc ohlc = entry.getValue().getHourOhlc();
+            if (ohlc.isOhlcWithPrice()) {
+                storeOhlc(ohlc);
+            }
+        }
+    }
+
+    public void storeAllDailyOhlc() {
+        for (Map.Entry<Long, OhlcStorage> entry : instrumentsDataStorage.entrySet()) {
+            Ohlc ohlc = entry.getValue().getDailyOhlc();
+            if (ohlc.isOhlcWithPrice()) {
+                storeOhlc(ohlc);
+            }
+        }
+    }
+
+    private void storeOhlc(Ohlc ohlc) {
+        ohlcStoreService.storeOhlc(ohlc);
     }
 }

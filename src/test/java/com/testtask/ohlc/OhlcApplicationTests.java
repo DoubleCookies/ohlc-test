@@ -334,4 +334,43 @@ class OhlcApplicationTests {
 		assertEquals(storage.getDailyOhlc().getHighPrice(), maxPrice);
 	}
 
+	@Test
+	public void shouldStoreMinuteOhlc() {
+		TestQuoteObject quote = new TestQuoteObject();
+		long instrumentId = 1L;
+		double price = 42;
+
+		quote.setInstrumentId(instrumentId);
+		quote.setPrice(price);
+		quote.setUtcTimestamp(System.currentTimeMillis());
+		ohlcProcessingService.onQuote(quote);
+		ohlcProcessingService.storeAllMinuteOhlc();
+	}
+
+	@Test
+	public void shouldStoreHourOhlc() {
+		TestQuoteObject quote = new TestQuoteObject();
+		long instrumentId = 1L;
+		double price = 42;
+
+		quote.setInstrumentId(instrumentId);
+		quote.setPrice(price);
+		quote.setUtcTimestamp(System.currentTimeMillis());
+		ohlcProcessingService.onQuote(quote);
+		ohlcProcessingService.storeAllHourOhlc();
+	}
+
+	@Test
+	public void shouldStoreDailyOhlc() {
+		TestQuoteObject quote = new TestQuoteObject();
+		long instrumentId = 1L;
+		double price = 42;
+
+		quote.setInstrumentId(instrumentId);
+		quote.setPrice(price);
+		quote.setUtcTimestamp(System.currentTimeMillis());
+		ohlcProcessingService.onQuote(quote);
+		ohlcProcessingService.storeAllDailyOhlc();
+	}
+
 }
