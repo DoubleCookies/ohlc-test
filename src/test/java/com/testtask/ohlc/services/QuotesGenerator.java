@@ -1,4 +1,4 @@
-package com.testtask.ohlc;
+package com.testtask.ohlc.services;
 
 import com.testtask.ohlc.interfaces.Quote;
 import com.testtask.ohlc.model.TestQuoteObject;
@@ -14,9 +14,13 @@ public class QuotesGenerator {
     private final Random random = new Random();
 
     public List<Quote> createSingleInstrumentQuotes(int count, long instrumentId) {
+        return createSingleInstrumentQuotes(count, instrumentId, 0);
+    }
+
+    public List<Quote> createSingleInstrumentQuotes(int count, long instrumentId, double addition) {
         List<Quote> quoteList = new ArrayList<>();
         for (int i = 0; i < count; i++) {
-            double price = random.nextDouble() * 100.0;
+            double price = random.nextDouble() * 100.0 + addition;
             TestQuoteObject quoteObject = new TestQuoteObject(price, instrumentId, System.currentTimeMillis());
             quoteList.add(quoteObject);
         }

@@ -13,7 +13,7 @@ import java.util.Map;
 
 @Service
 public class OhlcProcessingService implements OhlcService {
-    private Map<Long, OhlcStorage> instrumentsDataStorage = new HashMap<>();
+    private final Map<Long, OhlcStorage> instrumentsDataStorage = new HashMap<>();
 
     public Map<Long, OhlcStorage> getInstrumentsDataStorage() {
         return instrumentsDataStorage;
@@ -83,6 +83,9 @@ public class OhlcProcessingService implements OhlcService {
         }
     }
 
+    /**
+     * Update data of hour Ohlc with info from minute Ohlc
+     */
     public void updateHourOhlcAfterSavingMinuteOhlc() {
         for (Map.Entry<Long, OhlcStorage> entry : instrumentsDataStorage.entrySet()) {
             Ohlc minuteOhlc = entry.getValue().getMinuteOhlc();
@@ -90,15 +93,54 @@ public class OhlcProcessingService implements OhlcService {
             if (minuteOhlc.isOhlcWithPrice()) {
                 if (hourOhlc.getOpenPrice() == 0) {
                     initUpdatedOhlc(hourOhlc, minuteOhlc);
+                } else {
+                    updateOhlc(hourOhlc, minuteOhlc);
                 }
             }
         }
     }
 
-    private void initUpdatedOhlc(Ohlc oldOhlc, Ohlc newOhlc) {
-        oldOhlc.setOpenPrice(newOhlc.getOpenPrice());
-        oldOhlc.setClosePrice(newOhlc.getClosePrice());
-        oldOhlc.setHighPrice(newOhlc.getHighPrice());
-        oldOhlc.setLowPrice(newOhlc.getLowPrice());
+    /**
+     * Update data of dauly Ohlc with info from hour Ohlc
+     */
+    public void updateDailyOhlcAfterSavingHourOhlc() {
+        for (Map.Entry<Long, OhlcStorage> entry : instrumentsDataStorage.entrySet()) {
+            Ohlc hourOhlc = entry.getValue().getHourOhlc();
+            Ohlc dailyOhlc = entry.getValue().getDailyOhlc();
+            if (hourOhlc.isOhlcWithPrice()) {
+                if (dailyOhlc.getOpenPrice() == 0) {
+                    initUpdatedOhlc(dailyOhlc, hourOhlc);
+                } else {
+                    updateOhlc(dailyOhlc, hourOhlc);
+                }
+            }
+        }
+    }
+
+    /**
+     * Init "long" Ohlc with data from "short" Ohlc
+     *
+     * @param longOhlc  updated Ohlc (hour/day)
+     * @param shortOhlc short Ohlc (minute/hour)
+     */
+    private void initUpdatedOhlc(Ohlc longOhlc, Ohlc shortOhlc) {
+        longOhlc.setOpenPrice(shortOhlc.getOpenPrice());
+        longOhlc.setClosePrice(shortOhlc.getClosePrice());
+        longOhlc.setHighPrice(shortOhlc.getHighPrice());
+        longOhlc.setLowPrice(shortOhlc.getLowPrice());
+    }
+
+    /**
+     * Update "long" Ohlc with data from "short" Ohlc
+     *
+     * @param longOhlc  updated Ohlc (hour/day)
+     * @param shortOhlc short Ohlc (minute/hour)
+     */
+    private void updateOhlc(Ohlc longOhlc, Ohlc shortOhlc) {
+        longOhlc.setClosePrice(shortOhlc.getClosePrice());
+        if (shortOhlc.getLowPrice() < longOhlc.getLowPrice())
+            longOhlc.setLowPrice(shortOhlc.getLowPrice());
+        if (shortOhlc.getHighPrice() > longOhlc.getHighPrice())
+            longOhlc.setHighPrice(shortOhlc.getHighPrice());
     }
 }
