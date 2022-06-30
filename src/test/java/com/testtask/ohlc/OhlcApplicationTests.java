@@ -399,4 +399,37 @@ class OhlcApplicationTests {
 		assertFalse(dailyOhlc.isOhlcWithPrice());
 	}
 
+	@Test
+	public void shouldReturnLastOhlc() {
+		TestQuoteObject quote = new TestQuoteObject();
+		long instrumentId = 1L;
+		double price = 42;
+
+		quote.setInstrumentId(instrumentId);
+		quote.setPrice(price);
+		quote.setUtcTimestamp(System.currentTimeMillis());
+		ohlcProcessingService.onQuote(quote);
+
+		Ohlc ohlc = ohlcProcessingService.getCurrent(1L, OhlcPeriod.M1);
+
+		assertNotNull(ohlc);
+		assertEquals(ohlc.getLowPrice(), price);
+	}
+
+	@Test
+	public void shouldReturnNullIfOhlcNorFound() {
+		TestQuoteObject quote = new TestQuoteObject();
+		long instrumentId = 1L;
+		double price = 42;
+
+		quote.setInstrumentId(instrumentId);
+		quote.setPrice(price);
+		quote.setUtcTimestamp(System.currentTimeMillis());
+		ohlcProcessingService.onQuote(quote);
+
+		Ohlc ohlc = ohlcProcessingService.getCurrent(10000L, OhlcPeriod.M1);
+
+		assertNull(ohlc);
+	}
+
 }

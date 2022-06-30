@@ -30,7 +30,17 @@ public class OhlcProcessingService implements OhlcService {
 
     @Override
     public Ohlc getCurrent(long instrumentId, OhlcPeriod period) {
-        return null;
+        if (instrumentsDataStorage.containsKey(instrumentId)) {
+            OhlcStorage storage = instrumentsDataStorage.get(instrumentId);
+            switch (period) {
+                case M1: return storage.getMinuteOhlc();
+                case H1: return storage.getHourOhlc();
+                case D1: return storage.getDailyOhlc();
+                default: return null;
+            }
+        } else {
+            return null;
+        }
     }
 
     @Override
