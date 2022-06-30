@@ -45,12 +45,20 @@ public class OhlcProcessingService implements OhlcService {
 
     @Override
     public List<Ohlc> getHistorical(long instrumentId, OhlcPeriod period) {
-        return null;
+        return ohlcStoreService.getHistorical(instrumentId, period);
     }
 
     @Override
     public List<Ohlc> getHistoricalAndCurrent(long instrumentId, OhlcPeriod period) {
-        return null;
+        Ohlc currentOhlc = getCurrent(instrumentId, period);
+        List<Ohlc> historicalOhlc = getHistorical(instrumentId, period);
+
+        // Current Ohlc should be first because it has biggest timestamp and historical Ohlc are sorted
+        // in descending order
+        if (currentOhlc != null)
+            historicalOhlc.add(0, currentOhlc);
+
+        return historicalOhlc;
     }
 
     @Override

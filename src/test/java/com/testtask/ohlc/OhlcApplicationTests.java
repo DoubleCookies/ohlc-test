@@ -432,4 +432,26 @@ class OhlcApplicationTests {
 		assertNull(ohlc);
 	}
 
+	@Test
+	public void shouldProcessGetHistorical() {
+		long instrumentId = 1L;
+		ohlcProcessingService.getHistorical(instrumentId, OhlcPeriod.M1);
+	}
+
+	@Test
+	public void shouldProcessGetHistoricalAndCurrent() {
+		TestQuoteObject quote = new TestQuoteObject();
+		long instrumentId = 1L;
+		double price = 42;
+
+		quote.setInstrumentId(instrumentId);
+		quote.setPrice(price);
+		quote.setUtcTimestamp(System.currentTimeMillis());
+		ohlcProcessingService.onQuote(quote);
+
+		Ohlc ohlc = ohlcProcessingService.getCurrent(1L, OhlcPeriod.M1);
+
+		assertNotNull(ohlc);
+	}
+
 }
