@@ -14,6 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 
 import java.time.Instant;
+import java.util.Calendar;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -452,6 +453,45 @@ class OhlcApplicationTests {
 		Ohlc ohlc = ohlcProcessingService.getCurrent(1L, OhlcPeriod.M1);
 
 		assertNotNull(ohlc);
+	}
+
+	@Test
+	public void shouldHaveCorrectOhlcTimestamp() {
+		Calendar minute = Calendar.getInstance();
+		minute.set(Calendar.MILLISECOND, 0);
+		minute.set(Calendar.SECOND, 0);
+
+		Calendar hour = Calendar.getInstance();
+		hour.set(Calendar.MILLISECOND, 0);
+		hour.set(Calendar.SECOND, 0);
+		hour.set(Calendar.MINUTE, 0);
+
+		Calendar day = Calendar.getInstance();
+		day.set(Calendar.MILLISECOND, 0);
+		day.set(Calendar.SECOND, 0);
+		day.set(Calendar.MINUTE, 0);
+		day.set(Calendar.HOUR_OF_DAY, 0);
+
+		TestQuoteObject quote = new TestQuoteObject();
+		long instrumentId = 1L;
+		double price = 42;
+
+		quote.setInstrumentId(instrumentId);
+		quote.setPrice(price);
+		quote.setUtcTimestamp(minute.getTimeInMillis());
+		ohlcProcessingService.onQuote(quote);
+
+		Ohlc minuteOhlc = ohlcProcessingService.getCurrent(1L, OhlcPeriod.M1);
+		Ohlc hourOhlc = ohlcProcessingService.getCurrent(1L, OhlcPeriod.H1);
+		Ohlc dailyOhlc = ohlcProcessingService.getCurrent(1L, OhlcPeriod.D1);
+
+		assertNotNull(minuteOhlc);
+		assertNotNull(hourOhlc);
+		assertNotNull(dailyOhlc);
+
+		assertEquals(minuteOhlc.getPeriodStartUtcTimestamp(), minute.getTimeInMillis());
+		assertEquals(hourOhlc.getPeriodStartUtcTimestamp(), hour.getTimeInMillis());
+		assertEquals(dailyOhlc.getPeriodStartUtcTimestamp(), day.getTimeInMillis());
 	}
 
 }

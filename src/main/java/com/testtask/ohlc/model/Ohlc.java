@@ -63,13 +63,16 @@ public class Ohlc {
     }
 
     /**
-     * Method checks if Ohlc was "active" - because openPrice will be always updated if Ohlc was used
+     * Checks if Ohlc was "active" - because openPrice will be always updated if Ohlc was used
      * @return true, if price != 0
      */
     public boolean isOhlcWithPrice() {
         return openPrice != 0;
     }
 
+    /**
+     * Clear all prices in Ohlc
+     */
     public void clearOhlc() {
         closePrice = 0;
         openPrice = 0;

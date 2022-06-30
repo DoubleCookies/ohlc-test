@@ -16,10 +16,12 @@ import java.util.Map;
 public class OhlcProcessingService implements OhlcService {
 
     private final OhlcStoreService ohlcStoreService;
+    private final OhlcTimestampService ohlcTimestampService;
 
     @Autowired
-    public OhlcProcessingService(OhlcStoreService ohlcStoreService) {
+    public OhlcProcessingService(OhlcStoreService ohlcStoreService, OhlcTimestampService ohlcTimestampService) {
         this.ohlcStoreService = ohlcStoreService;
+        this.ohlcTimestampService = ohlcTimestampService;
     }
 
     private final Map<Long, OhlcStorage> instrumentsDataStorage = new HashMap<>();
@@ -77,7 +79,11 @@ public class OhlcProcessingService implements OhlcService {
     }
 
     private OhlcStorage initOhlcStorageForInstrument() {
-        return new OhlcStorage();
+        OhlcStorage storage = new OhlcStorage();
+        storage.getMinuteOhlc().setPeriodStartUtcTimestamp(ohlcTimestampService.getMinuteOhlcTimestamp());
+        storage.getHourOhlc().setPeriodStartUtcTimestamp(ohlcTimestampService.getHourOhlcTimestamp());
+        storage.getDailyOhlc().setPeriodStartUtcTimestamp(ohlcTimestampService.getDailyOhlcTimestamp());
+        return storage;
     }
 
     /**
