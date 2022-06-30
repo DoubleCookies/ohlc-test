@@ -230,6 +230,7 @@ public class OhlcProcessingService implements OhlcService {
         for (Map.Entry<Long, OhlcStorage> entry : instrumentsDataStorage.entrySet()) {
             Ohlc ohlc = entry.getValue().getMinuteOhlc();
             ohlc.clearOhlc();
+            ohlc.setPeriodStartUtcTimestamp(ohlcTimestampService.getMinuteOhlcTimestamp());
         }
     }
 
@@ -237,6 +238,7 @@ public class OhlcProcessingService implements OhlcService {
         for (Map.Entry<Long, OhlcStorage> entry : instrumentsDataStorage.entrySet()) {
             Ohlc ohlc = entry.getValue().getHourOhlc();
             ohlc.clearOhlc();
+            ohlc.setPeriodStartUtcTimestamp(ohlcTimestampService.getHourOhlcTimestamp());
         }
     }
 
@@ -244,6 +246,7 @@ public class OhlcProcessingService implements OhlcService {
         for (Map.Entry<Long, OhlcStorage> entry : instrumentsDataStorage.entrySet()) {
             Ohlc ohlc = entry.getValue().getDailyOhlc();
             ohlc.clearOhlc();
+            ohlc.setPeriodStartUtcTimestamp(ohlcTimestampService.getDailyOhlcTimestamp());
         }
     }
 }
