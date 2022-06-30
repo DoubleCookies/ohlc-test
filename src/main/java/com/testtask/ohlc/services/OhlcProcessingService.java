@@ -92,7 +92,7 @@ public class OhlcProcessingService implements OhlcService {
         }
     }
 
-        public void processMinuteOhlcAfterPeriod() {
+    public void processMinuteOhlcAfterPeriod() {
         updateHourOhlcBeforeSavingMinuteOhlc();
         updateDailyOhlcBeforeSavingHourOhlc();
         storeAllMinuteOhlc();
