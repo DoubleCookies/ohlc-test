@@ -4,32 +4,20 @@ import com.testtask.ohlc.enums.OhlcPeriod;
 
 public class OhlcStorage {
 
-    private Ohlc minuteOhlc;
-    private Ohlc hourOhlc;
-    private Ohlc dailyOhlc;
+    private final Ohlc minuteOhlc;
+    private final Ohlc hourOhlc;
+    private final Ohlc dailyOhlc;
 
     public Ohlc getMinuteOhlc() {
         return minuteOhlc;
-    }
-
-    public void setMinuteOhlc(Ohlc minuteOhlc) {
-        this.minuteOhlc = minuteOhlc;
     }
 
     public Ohlc getHourOhlc() {
         return hourOhlc;
     }
 
-    public void setHourOhlc(Ohlc hourOhlc) {
-        this.hourOhlc = hourOhlc;
-    }
-
     public Ohlc getDailyOhlc() {
         return dailyOhlc;
-    }
-
-    public void setDailyOhlc(Ohlc dailyOhlc) {
-        this.dailyOhlc = dailyOhlc;
     }
 
     public OhlcStorage() {

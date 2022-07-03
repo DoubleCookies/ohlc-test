@@ -20,7 +20,7 @@ public class QuotesGenerator {
     public List<Quote> createSingleInstrumentQuotes(int count, long instrumentId, double addition) {
         List<Quote> quoteList = new ArrayList<>();
         for (int i = 0; i < count; i++) {
-            double price = random.nextDouble() * 100.0 + addition;
+            double price = 1 + random.nextDouble() * 100.0 + addition;
             TestQuoteObject quoteObject = new TestQuoteObject(price, instrumentId, System.currentTimeMillis());
             quoteList.add(quoteObject);
         }
@@ -30,7 +30,7 @@ public class QuotesGenerator {
     public List<Quote> createMultipleInstrumentQuotes(int count, long... instrumentId) {
         List<Quote> quoteList = new ArrayList<>();
         for (int i = 0; i < count; i++) {
-            double price = random.nextDouble() * 100.0;
+            double price = 1 +  random.nextDouble() * 100.0;
             TestQuoteObject quoteObject = new TestQuoteObject(price, random.nextInt(instrumentId.length), System.currentTimeMillis());
             quoteList.add(quoteObject);
         }

@@ -57,7 +57,7 @@ public class OhlcProcessingService implements OhlcService {
 
         // Current Ohlc should be first because it has biggest timestamp and historical Ohlc are sorted
         // in descending order
-        if (currentOhlc != null)
+        if (currentOhlc != null && historicalOhlc != null)
             historicalOhlc.add(0, currentOhlc);
 
         return historicalOhlc;
@@ -78,6 +78,10 @@ public class OhlcProcessingService implements OhlcService {
         }
     }
 
+    /**
+     * Init OhlcStorage for all OHLC
+     * @return OhlcStorageObject with minute, hour and year OHLC
+     */
     private OhlcStorage initOhlcStorageForInstrument() {
         OhlcStorage storage = new OhlcStorage();
         storage.getMinuteOhlc().setPeriodStartUtcTimestamp(ohlcTimestampService.getMinuteOhlcTimestamp());
@@ -106,6 +110,11 @@ public class OhlcProcessingService implements OhlcService {
      * @param price Incoming price
      */
     private void updateOhlcQuote(Ohlc ohlc, double price) {
+        if (ohlc.getOpenPrice() == 0) {
+            ohlc.setOpenPrice(price);
+            // also set low price because it's first price
+            ohlc.setLowPrice(price);
+        }
         ohlc.setClosePrice(price);
         if (price < ohlc.getLowPrice()) {
             ohlc.setLowPrice(price);
@@ -116,6 +125,9 @@ public class OhlcProcessingService implements OhlcService {
         }
     }
 
+    /**
+     * Update hour & daily OHLC, store and clear minute OHLC
+     */
     public void processMinuteOhlcAfterPeriod() {
         updateHourOhlcBeforeSavingMinuteOhlc();
         updateDailyOhlcBeforeSavingHourOhlc();
@@ -123,12 +135,18 @@ public class OhlcProcessingService implements OhlcService {
         clearMinuteOhlc();
     }
 
+    /**
+     * Update daily OHLC, store and clear hour OHLC
+     */
     public void processHourOhlcAfterPeriod() {
         updateDailyOhlcBeforeSavingHourOhlc();
         storeAllHourOhlc();
         clearHourOhlc();
     }
 
+    /**
+     * Store and clear daily OHLC
+     */
     public void processDailyOhlcAfterPeriod() {
         storeAllDailyOhlc();
         clearDailyOhlc();
@@ -137,7 +155,7 @@ public class OhlcProcessingService implements OhlcService {
     /**
      * Update data of hour Ohlc with info from minute Ohlc
      */
-    public void updateHourOhlcBeforeSavingMinuteOhlc() {
+    private void updateHourOhlcBeforeSavingMinuteOhlc() {
         for (Map.Entry<Long, OhlcStorage> entry : instrumentsDataStorage.entrySet()) {
             Ohlc minuteOhlc = entry.getValue().getMinuteOhlc();
             Ohlc hourOhlc = entry.getValue().getHourOhlc();
@@ -154,7 +172,7 @@ public class OhlcProcessingService implements OhlcService {
     /**
      * Update data of daily Ohlc with info from hour Ohlc
      */
-    public void updateDailyOhlcBeforeSavingHourOhlc() {
+    private void updateDailyOhlcBeforeSavingHourOhlc() {
         for (Map.Entry<Long, OhlcStorage> entry : instrumentsDataStorage.entrySet()) {
             Ohlc hourOhlc = entry.getValue().getHourOhlc();
             Ohlc dailyOhlc = entry.getValue().getDailyOhlc();
@@ -195,7 +213,7 @@ public class OhlcProcessingService implements OhlcService {
             longOhlc.setHighPrice(shortOhlc.getHighPrice());
     }
 
-    public void storeAllMinuteOhlc() {
+    private void storeAllMinuteOhlc() {
         for (Map.Entry<Long, OhlcStorage> entry : instrumentsDataStorage.entrySet()) {
             Ohlc ohlc = entry.getValue().getMinuteOhlc();
             if (ohlc.isOhlcWithPrice()) {
@@ -204,7 +222,7 @@ public class OhlcProcessingService implements OhlcService {
         }
     }
 
-    public void storeAllHourOhlc() {
+    private void storeAllHourOhlc() {
         for (Map.Entry<Long, OhlcStorage> entry : instrumentsDataStorage.entrySet()) {
             Ohlc ohlc = entry.getValue().getHourOhlc();
             if (ohlc.isOhlcWithPrice()) {
@@ -213,7 +231,7 @@ public class OhlcProcessingService implements OhlcService {
         }
     }
 
-    public void storeAllDailyOhlc() {
+    private void storeAllDailyOhlc() {
         for (Map.Entry<Long, OhlcStorage> entry : instrumentsDataStorage.entrySet()) {
             Ohlc ohlc = entry.getValue().getDailyOhlc();
             if (ohlc.isOhlcWithPrice()) {
